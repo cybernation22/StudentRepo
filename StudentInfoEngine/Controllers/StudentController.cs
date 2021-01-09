@@ -27,116 +27,177 @@ namespace StudentInfoEngine.Controllers
         [HttpPost]
         public async Task<ActionResult<IEnumerable<StudentView>>> GetStudents([FromBody] SearchCriteria criteria)
         {
-            var dbStudents = _context.Students.Join(_context.Genders, st => st.GenderId, gend => gend.ID, (st, gend) => new StudentView()
+            try
             {
-                PrivateNumber = st.PrivateNumber,
-                FirstName = st.FirstName,
-                LastName = st.LastName,
-                BirthDate = st.BirthDate,
-                ID = st.ID,
-                GenderDesc = gend.Description
-            });
-
-
-            if (!string.IsNullOrWhiteSpace(criteria.PrivateNumber))
-                dbStudents = dbStudents.Where(x => x.PrivateNumber == criteria.PrivateNumber);
-            if (criteria.BirthDateFrom != null)
-                dbStudents = dbStudents.Where(x => x.BirthDate > criteria.BirthDateFrom);
-            if (criteria.BirthDateTo != null)
-                dbStudents = dbStudents.Where(x => x.BirthDate < criteria.BirthDateTo);
-
-        var someval = dbStudents
-                .OrderByDescending(x => x.ID).Skip(criteria.Page * criteria.PageSize).Take(criteria.PageSize);
-
-
-
-
-
-
-            var studentsCount = await _context.Students.CountAsync();
-
-            var data = new
-            {
-                paginator = new
+                var dbStudents = _context.Students.Join(_context.Genders, st => st.GenderId, gend => gend.ID, (st, gend) => new StudentView()
                 {
-                    totalCount = studentsCount,
-                    pageSize = criteria.PageSize,
-                    currentPage = criteria.Page
-                },
-                students = await someval.ToListAsync(),
-            };
+                    PrivateNumber = st.PrivateNumber,
+                    FirstName = st.FirstName,
+                    LastName = st.LastName,
+                    BirthDate = st.BirthDate,
+                    ID = st.ID,
+                    GenderDesc = gend.Description
+                });
 
-            return Ok(data);
+
+                if (!string.IsNullOrWhiteSpace(criteria.PrivateNumber))
+                    dbStudents = dbStudents.Where(x => x.PrivateNumber == criteria.PrivateNumber);
+                if (criteria.BirthDateFrom != null)
+                    dbStudents = dbStudents.Where(x => x.BirthDate > criteria.BirthDateFrom);
+                if (criteria.BirthDateTo != null)
+                    dbStudents = dbStudents.Where(x => x.BirthDate < criteria.BirthDateTo);
+
+                var resultStudents = dbStudents
+                        .OrderByDescending(x => x.ID).Skip(criteria.Page * criteria.PageSize).Take(criteria.PageSize);
+
+
+                var studentsCount = await _context.Students.CountAsync();
+
+                var data = new
+                {
+                    paginator = new
+                    {
+                        totalCount = studentsCount,
+                        pageSize = criteria.PageSize,
+                        currentPage = criteria.Page
+                    },
+                    students = await resultStudents.ToListAsync(),
+                };
+
+                return Ok(data);
+            }
+
+            catch(Exception ex)
+            {
+                return StatusCode(500, $"შეცდომა სერვერზე {ex.Message}");
+            }
         }
 
 
         [HttpGet]
         public async Task<ActionResult<bool>> GetstudentByPn(string privateNumber)
         {
-            var studentExists = await _context.Students.AnyAsync(x => x.PrivateNumber == privateNumber);
+            try
+            {
+                var studentExists = await _context.Students.AnyAsync(x => x.PrivateNumber == privateNumber);
 
-            return Ok(studentExists);
+                return Ok(studentExists);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"შეცდომა სერვერზე {ex.Message}");
+            }
         }
 
         [HttpGet]
         public async Task<ActionResult<Student>> GetStudent(int id)
         {
-            var student = await _repository.FindById<Student>(id);
-
-            if (student == null)
+            try
             {
-                return NotFound();
+                var student = await _repository.FindById<Student>(id);
+
+                if (student == null)
+                {
+                    return NotFound("სტუდენტი მოცემული პარამეტრით არ არსებობს");
+                }
+
+
+                return student;
             }
 
-            return student;
+            catch(Exception ex)
+            {
+                return StatusCode(500, $"შეცდომა სერვერზე {ex.Message}");
+            }
+
+
         }
 
 
         [HttpPut]
         public async Task<IActionResult> ModifyStudent(Student student)
         {
-            await _repository.UpdateAsync<Student>(student);
+            var item  = await _context.Students.AnyAsync(x => x.PrivateNumber == student.PrivateNumber && x.ID != student.ID);
+            if (item)
+            {
+                return BadRequest("პიროვნება მსგავსი პირადი ნომრით უკვე არსებობს");
+            }
+            
 
-            return NoContent();
+            try
+            {
+                await _repository.UpdateAsync<Student>(student);
+
+                return Ok();
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, $"შეცდომა სერვერზე {ex.Message}");
+            }
         }
 
 
         [HttpPost]
         public async Task<ActionResult> PostStudent([FromBody] Student student)
         {
-            await _repository.CreateAsync<Student>(student);
+            try
+            {
+                await _repository.CreateAsync<Student>(student);
+                return Ok();
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, $"შეცდომა სერვერზე {ex.Message}");
+            }
 
-            return Ok();
+            
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteStudent(int id)
         {
-            var student = await _repository.FindById<Student>(id);
-
-            if (student == null)
+            try
             {
-                return NotFound();
+                var student = await _repository.FindById<Student>(id);
+
+                if (student == null)
+                {
+                    return NotFound();
+                }
+
+                await _repository.DeleteAsync<Student>(student);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"შეცდომა სერვერზე {ex.Message}");
             }
 
-            await _repository.DeleteAsync<Student>(student);
 
-            return Ok();
         }
 
         [HttpGet]
-        public async Task<ActionResult<bool>> AgeValidator(DateTime birthDate)
-        {
-            return Ok(DateTime.Now < birthDate.AddYears(16));
+        public  async Task<ActionResult<bool>> AgeValidator(DateTime birthDate)
+        {            
+            return  Ok(DateTime.Now < birthDate.AddYears(16));
         }
 
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Gender>>> GetGender()
         {
-            var gender = await _context.Genders.ToListAsync();
+            try
+            {
+                var gender = await _context.Genders.ToListAsync();
 
-            return Ok(gender);
+                return Ok(gender);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"შეცდომა სერვერზე {ex.Message}");
+            }
+
         }
 
 
