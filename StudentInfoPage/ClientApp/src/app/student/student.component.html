@@ -1,0 +1,72 @@
+<div fxLayoutAlign="center center">
+  <h3 class="header" mat-dialog-title>{{isUpdate? "რედაქტირება" : "დამატება"}}</h3>
+</div>
+<mat-dialog-content class="mat-typography">
+  <div class="example-loading-shade" *ngIf="isLoadingResults">
+    <mat-spinner *ngIf="isLoadingResults"></mat-spinner>
+    
+  </div>
+
+  <form [formGroup]="form">
+    <div fxLayout="column">
+      <mat-form-field appearance="outline" fxFlex>
+        <mat-label>პირადი ნომერი</mat-label>
+        <input matInput formControlName="privateNumber" maxlength=11 minlength=11 />
+        <mat-error *ngIf="form.get('privateNumber').errors?.pnExists">
+          <span> {{form.get('privateNumber').errors?.pnExists}} </span>
+        </mat-error>
+        <mat-error *ngIf="form.get('privateNumber').errors?.required">
+          <span> შევსება აუცილებელია</span>
+        </mat-error>
+        <mat-error *ngIf="form.get('privateNumber').errors?.pattern">
+          <span> დაშვებულია მხოლოდ ციფრები</span>
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" fxFlex>
+        <mat-label>სახელი</mat-label>
+        <input matInput formControlName="firstName" maxlength=50 />
+        <mat-error *ngIf="form.get('firstName').errors?.required">
+          <span> შევსება აუცილებელია </span>
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" fxFlex>
+        <mat-label>გვარი</mat-label>
+        <input matInput formControlName="lastName" maxlength=50 />
+        <mat-error *ngIf="form.get('lastName').errors?.required">
+          <span> შევსება აუცილებელია </span>
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>დაბადების თარიღი</mat-label>
+        <input formControlName="birthDate" readonly matInput [matDatepicker]="picker">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="form.get('birthDate').errors?.underAge">
+          <span> {{form.get('birthDate').errors?.underAge}} </span>
+        </mat-error>
+        <mat-error *ngIf="form.get('birthDate').errors?.required">
+          <span>შევსება აუცილებელია </span>
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>სქესი</mat-label>
+        <mat-select formControlName="genderId">
+          <mat-option *ngFor="let item of genderList | async" [value]="item.id">
+            {{item.description}}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('genderId').errors?.required">
+          <span> შევსება აუცილებელია </span>
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-raised-button mat-dialog-close color="">გაუქმება</button>
+  <button mat-raised-button color="primary" [disabled]="!form.valid" (click)="closeDialog()" cdkFocusInitial>
+    დადასტურება
+  </button>
+</mat-dialog-actions>
