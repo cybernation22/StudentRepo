@@ -50,7 +50,7 @@ export class StudentComponent implements OnInit {
         this.isLoadingResults =false;
       },
         (error) => {
-          this.snackBar.open('სტუდენტის მონაცემების ინიციალიზაციის დროს მოხდა შეცდომა' + error);
+          this.snackBar.open(error.message);
         }
       )
     }
@@ -79,7 +79,7 @@ export class StudentComponent implements OnInit {
         
       },
         (error) => {
-          this.snackBar.open('მოხდა შეცდომა' + error);
+          this.snackBar.open(error.message)
         }
       )
     }
@@ -89,7 +89,7 @@ export class StudentComponent implements OnInit {
         this.snackBar.open('ჩაიწერა წარმატებით');
       },
         (error) => {
-          this.snackBar.open('მოხდა შეცდომა' + error);
+          this.snackBar.open(error.message)
         }
       )
     }

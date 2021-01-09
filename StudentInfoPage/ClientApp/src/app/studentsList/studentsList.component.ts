@@ -72,7 +72,7 @@ export class StudentsListComponent implements OnInit {
       this.snackBar.open("წაიშალა წარმატებით");
     },
       (error) => {
-        this.snackBar.open("მოხდა შეცდომა" + error);
+        this.snackBar.open(error.message)
       }
     )
   }
@@ -99,7 +99,7 @@ export class StudentsListComponent implements OnInit {
 
   getStudentsList(criteria?: searchCriteria, event?: any) {
     this.utils.spinner.next(true);
-    
+
     let searchTerm = {
       ...criteria,
       Page: event ? event.pageIndex : 0,
@@ -113,7 +113,7 @@ export class StudentsListComponent implements OnInit {
 
       },
         (error) => {
-          this.snackBar.open("მოხდა შეცდომა" + error);
+          this.snackBar.open(error.message)
         },
         () => {
           this.utils.spinner.next(false);

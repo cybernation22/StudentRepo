@@ -1,5 +1,9 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { throwError } from 'rxjs';
+
+import { catchError } from 'rxjs/operators';
+
 import { environment } from 'src/environments/environment';
 import { searchCriteria } from '../models/searchCriteria';
 import { studentModel } from '../models/student';
@@ -11,46 +15,70 @@ import { Utils } from './utils.service';
 export class StudentService {
 
   constructor(private httpClnt: HttpClient,
-    private utilService: Utils) {}
+    private utilService: Utils) { }
 
-    
+
   getGender() {
-    return this.httpClnt.get(`${environment.apiUrl}/Student/GetGender`);
+    return this.httpClnt.get(`${environment.apiUrl}/Student/GetGender`)
+      .pipe(catchError(this.handleError));
   }
 
   getStudents(criteria: searchCriteria) {
     return this.httpClnt.post<studentModel[]>(`${environment.apiUrl}/Student/Getstudents`,
       criteria
-    );
+    )
+      .pipe(catchError(this.handleError));
   }
 
   setStudent(student) {
-    return this.httpClnt.post(`${environment.apiUrl}/Student/PostStudent`, student);
+    return this.httpClnt.post(`${environment.apiUrl}/Student/PostStudent`, student)
+      .pipe(catchError(this.handleError));
   }
 
-   
+
   updateStudent(student) {
     return this.httpClnt.put(`${environment.apiUrl}/Student/ModifyStudent`,
-     student
-    );
+      student
+    ).pipe(catchError(this.handleError));
   }
 
   removeStudent(id) {
     return this.httpClnt.delete(`${environment.apiUrl}/Student/DeleteStudent/${id}`)
+      .pipe(catchError(this.handleError));
   }
 
   checkPrivateNumber(pn) {
-    return this.httpClnt.get(`${environment.apiUrl}/Student/GetstudentByPn?privateNumber=${pn}`);
+    return this.httpClnt.get(`${environment.apiUrl}/Student/GetstudentByPn?privateNumber=${pn}`)
+      .pipe(catchError(this.handleError));
   }
 
   getStudent(id) {
-    return this.httpClnt.get(`${environment.apiUrl}/Student/GetStudent?id=${id}`);
+    return this.httpClnt.get(`${environment.apiUrl}/Student/GetStudent?id=${id}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  handleError(errorResponse: HttpErrorResponse) {
+    if (errorResponse.error instanceof ProgressEvent) {
+      return throwError({
+        isServer: false,
+        message: errorResponse.message
+      });
+    }
+    else {
+
+      return throwError({
+        isServer: true,
+        message: errorResponse.error
+      });
+    }
+
   }
 
   ageValidator(birthdate) {
     let convertedDate = this.utilService.transformDate(birthdate).toString();
 
-    return this.httpClnt.get(`${environment.apiUrl}/Student/AgeValidator?birthDate=${convertedDate}`);
+    return this.httpClnt.get(`${environment.apiUrl}/Student/AgeValidator?birthDate=${convertedDate}`)
+      .pipe(catchError(this.handleError));
   }
 
 
