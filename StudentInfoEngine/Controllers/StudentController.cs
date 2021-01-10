@@ -24,8 +24,8 @@ namespace StudentInfoEngine.Controllers
             _context = context;
         }
 
-        [HttpPost]
-        public async Task<ActionResult<IEnumerable<StudentView>>> GetStudents([FromBody] SearchCriteria criteria)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<StudentView>>> GetStudents([FromQuery] SearchCriteria criteria)
         {
             try
             {

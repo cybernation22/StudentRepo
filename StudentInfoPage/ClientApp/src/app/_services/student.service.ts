@@ -22,10 +22,17 @@ export class StudentService {
     return this.httpClnt.get(`${environment.apiUrl}/Student/GetGender`)
       .pipe(catchError(this.handleError));
   }
-
+  
   getStudents(criteria: searchCriteria) {
-    return this.httpClnt.post<studentModel[]>(`${environment.apiUrl}/Student/Getstudents`,
-      criteria
+    return this.httpClnt.get<studentModel[]>(`${environment.apiUrl}/Student/Getstudents`,
+      {
+        params: new HttpParams()
+          .set('privateNumber', criteria.privateNumber || '')
+          .set('birthDateFrom', criteria.birthDateFrom? criteria.birthDateFrom.toString() : '')
+          .set('birthDateTo', criteria.birthDateTo ? criteria.birthDateTo.toString() : '')
+          .set('page', criteria.page ? criteria.page.toString() : '0')
+          .set('pageSize', criteria.pageSize.toString())
+      }
     )
       .pipe(catchError(this.handleError));
   }
@@ -58,6 +65,7 @@ export class StudentService {
   }
 
   handleError(errorResponse: HttpErrorResponse) {
+    debugger;
     if (errorResponse.error instanceof ProgressEvent) {
       return throwError({
         isServer: false,

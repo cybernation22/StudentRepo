@@ -100,10 +100,11 @@ export class StudentsListComponent implements OnInit {
   getStudentsList(criteria?: searchCriteria, event?: any) {
     this.utils.spinner.next(true);
 
+    debugger;
     let searchTerm = {
       ...criteria,
-      Page: event ? event.pageIndex : 0,
-      pageSize: event ? event.pageSize : 5
+      page: event ? event.pageIndex : 0,
+      pageSize: event ? event.pageSize : this.paging.pageSize
     }
 
     this.studentService.getStudents(searchTerm)

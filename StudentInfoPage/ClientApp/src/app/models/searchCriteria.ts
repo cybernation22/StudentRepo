@@ -2,6 +2,6 @@ export interface searchCriteria{
 privateNumber: string,
 birthDateFrom: Date,
 birthDateTo: Date,
-Page: number,
+page: number,
 pageSize: number
 }
