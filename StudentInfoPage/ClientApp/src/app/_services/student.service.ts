@@ -65,7 +65,6 @@ export class StudentService {
   }
 
   handleError(errorResponse: HttpErrorResponse) {
-    debugger;
     if (errorResponse.error instanceof ProgressEvent) {
       return throwError({
         isServer: false,
@@ -73,7 +72,6 @@ export class StudentService {
       });
     }
     else {
-
       return throwError({
         isServer: true,
         message: errorResponse.error

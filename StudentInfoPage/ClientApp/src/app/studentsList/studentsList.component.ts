@@ -100,7 +100,6 @@ export class StudentsListComponent implements OnInit {
   getStudentsList(criteria?: searchCriteria, event?: any) {
     this.utils.spinner.next(true);
 
-    debugger;
     let searchTerm = {
       ...criteria,
       page: event ? event.pageIndex : 0,
