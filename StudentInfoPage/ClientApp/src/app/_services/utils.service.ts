@@ -11,9 +11,14 @@ export class Utils {
 
   spinner =  new Subject<boolean>();
   spinnerDialog =  new Subject<boolean>();
-  
+
 
   transformDate(date) {
+    return this.datePipe.transform(date, 'yyyy-MM-dd');
+  }
+
+
+  kservice(date) {
     return this.datePipe.transform(date, 'yyyy-MM-dd');
   }
 
